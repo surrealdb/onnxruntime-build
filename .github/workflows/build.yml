@@ -34,7 +34,7 @@ jobs:
           - target: linux-aarch64-static_lib
             runs-on: ["self-hosted", "amd64", "builder"]
             build: >
-              PARALLEL_JOB_COUNT=2
+              PARALLEL_JOB_COUNT=3 # 4 vCPUs
               ./build-static_lib.sh
             post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
@@ -97,9 +97,15 @@ jobs:
 
       - name: Setup GCC
         if: runner.os == 'Linux'
-        uses: egor-tensin/setup-gcc@v1
-        with:
-          version: ${{ env.GCC_VERSION }}
+        run: |
+          sudo apt-get update -q -y
+          sudo apt-get install -q -y \
+            g++-${{ env.GCC_VERSION }} \
+            gcc-${{ env.GCC_VERSION }} \
+            gfortran-${{ env.GCC_VERSION }}
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ env.GCC_VERSION }} 1
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ env.GCC_VERSION }} 1
+          sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-${{ env.GCC_VERSION }} 1
 
       - name: Setup CMake
         uses: lukka/get-cmake@latest
