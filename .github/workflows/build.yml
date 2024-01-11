@@ -1,5 +1,7 @@
 name: Build
 
+run-name: Build ${{ inputs.onnxruntime-version || github.ref_name }}
+
 on:
   workflow_dispatch:
     inputs:
