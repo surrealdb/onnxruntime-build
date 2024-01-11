@@ -32,7 +32,7 @@ jobs:
       matrix:
         include:
           - target: linux-aarch64-static_lib
-            runs-on: buildjet-4vcpu-ubuntu-2204-arm
+            runs-on: ["self-hosted", "amd64", "builder"]
             build: >
               PARALLEL_JOB_COUNT=2
               ./build-static_lib.sh
@@ -44,12 +44,12 @@ jobs:
             post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
           - target: osx-arm64-static_lib
-            runs-on: ghcr.io/cirruslabs/macos-ventura-xcode:14.2
+            runs-on: macos-latest-xl
             build: ./build-static_lib.sh
             post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
           - target: osx-universal2-static_lib
-            runs-on: ghcr.io/cirruslabs/macos-ventura-xcode:14.2
+            runs-on: macos-latest-xl
             build: >
               CMAKE_OPTIONS="-D CMAKE_OSX_ARCHITECTURES=arm64;x86_64"
               ./build-static_lib.sh
@@ -62,34 +62,41 @@ jobs:
 
           - target: win-x64-static_lib
             runs-on: windows-2019
-            build: ./build-static_lib.sh
+            build: |
+              # Apply windows patch to fix the build
+              # Patch from https://github.com/microsoft/onnxruntime/pull/17716
+              cp windows.patch onnxruntime/
+              cd onnxruntime
+              git apply windows.patch
+
+              ./build-static_lib.sh
             post-build: 7z a $ARCHIVE_DIR/$ARCHIVE_NAME.zip $OUTPUT_DIR/*
 
-          - target: wasm-static_lib
-            runs-on: ubuntu-latest
-            build: ./build-wasm-static_lib.sh
-            post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
+          # - target: wasm-static_lib
+          #   runs-on: ubuntu-latest
+          #   build: ./build-wasm-static_lib.sh
+          #   post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
-          - target: wasm-static_lib-simd
-            runs-on: ubuntu-latest
-            build: >
-              BUILD_OPTIONS="--enable_wasm_simd"
-              ./build-wasm-static_lib.sh
-            post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
+          # - target: wasm-static_lib-simd
+          #   runs-on: ubuntu-latest
+          #   build: >
+          #     BUILD_OPTIONS="--enable_wasm_simd"
+          #     ./build-wasm-static_lib.sh
+          #   post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
-          - target: wasm-static_lib-threads
-            runs-on: ubuntu-latest
-            build: >
-              BUILD_OPTIONS="--enable_wasm_threads"
-              ./build-wasm-static_lib.sh
-            post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
+          # - target: wasm-static_lib-threads
+          #   runs-on: ubuntu-latest
+          #   build: >
+          #     BUILD_OPTIONS="--enable_wasm_threads"
+          #     ./build-wasm-static_lib.sh
+          #   post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
-          - target: wasm-static_lib-simd-threads
-            runs-on: ubuntu-latest
-            build: >
-              BUILD_OPTIONS="--enable_wasm_simd --enable_wasm_threads"
-              ./build-wasm-static_lib.sh
-            post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
+          # - target: wasm-static_lib-simd-threads
+          #   runs-on: ubuntu-latest
+          #   build: >
+          #     BUILD_OPTIONS="--enable_wasm_simd --enable_wasm_threads"
+          #     ./build-wasm-static_lib.sh
+          #   post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
     steps:
       - name: Checkout
