@@ -62,14 +62,7 @@ jobs:
 
           - target: win-x64-static_lib
             runs-on: windows-2019
-            build: |
-              # Apply windows patch to fix the build
-              # Patch from https://github.com/microsoft/onnxruntime/pull/17716
-              cp windows.patch onnxruntime/
-              cd onnxruntime
-              git apply windows.patch
-
-              ./build-static_lib.sh
+            build: ./build-static_lib.sh
             post-build: 7z a $ARCHIVE_DIR/$ARCHIVE_NAME.zip $OUTPUT_DIR/*
 
           # - target: wasm-static_lib
