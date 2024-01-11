@@ -29,6 +29,15 @@ cd $(dirname $0)
     git submodule update --init --depth=1 --recursive
 )
 
+# Apply windows patch to fix the build
+# Patch from https://github.com/microsoft/onnxruntime/pull/17716
+
+(
+    cp windows.patch $ONNXRUNTIME_SOURCE_DIR
+    cd $ONNXRUNTIME_SOURCE_DIR
+    git apply windows.patch
+)
+
 cmake \
     -S $SOURCE_DIR \
     -B $BUILD_DIR \
