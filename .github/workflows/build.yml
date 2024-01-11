@@ -47,8 +47,10 @@ jobs:
             post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
           - target: osx-arm64-static_lib
-            runs-on: macos-latest-xl
-            build: ./build-static_lib.sh
+            runs-on: macos-latest-xlarge
+            build: >
+              CMAKE_OPTIONS="-D CMAKE_OSX_ARCHITECTURES=arm64"
+              ./build-static_lib.sh
             post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
           - target: osx-universal2-static_lib
@@ -60,7 +62,9 @@ jobs:
 
           - target: osx-x86_64-static_lib
             runs-on: macos-latest
-            build: ./build-static_lib.sh
+            build: >
+              CMAKE_OPTIONS="-D CMAKE_OSX_ARCHITECTURES=x86_64"
+              ./build-static_lib.sh
             post-build: tar -czvf $ARCHIVE_DIR/$ARCHIVE_NAME.tgz -C $OUTPUT_DIR .
 
           - target: win-x64-static_lib
