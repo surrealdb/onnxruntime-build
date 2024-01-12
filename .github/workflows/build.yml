@@ -34,7 +34,7 @@ jobs:
       matrix:
         include:
           - target: linux-aarch64-static_lib
-            runs-on: ["self-hosted", "amd64", "builder"]
+            runs-on: ["self-hosted", "arm64", "builder"]
             # runner has 4 vCPUs
             build: >
               PARALLEL_JOB_COUNT=3
